@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood-Based Book Recommendation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <h1>Mood-Based Book Recommendation</h1>
+        <label for="mood">Select Your Mood:</label>
+        <select id="mood">
+            <option value="happy">Happy</option>
+            <option value="sad">Sad</option>
+            <option value="adventurous">Adventurous</option>
+            <option value="relaxed">Relaxed</option>
+        </select>
+        <button onclick="recommendBooks()">Get Recommendations</button>
+        <div id="recommendations"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0GPzDloUKwT5oNW24ZG6T38-8ZGXhpJI",
+            authDomain: "inkedsense-f2e23.firebaseapp.com",
+            projectId: "inkedsense-f2e23",
+            storageBucket: "inkedsense-f2e23.firebaseapp.com",
+            messagingSenderId: "311301259622",
+            appId: "1:311301259622:web:f0b24ef3b5b4632bfbc8a7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function recommendBooks() {
+            const mood = document.getElementById('mood').value;
+            const recommendationsDiv = document.getElementById('recommendations');
+            recommendationsDiv.innerHTML = ''; // Clear previous recommendations
+
+            try {
+                const q = query(collection(db, 'books'), where('mood', '==', mood));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    recommendationsDiv.innerHTML = `<p>No recommendations available for this mood.</p>`;
+                } else {
+                    querySnapshot.forEach(doc => {
+                        const book = doc.data();
+                        const bookElement = document.createElement('p');
+                        bookElement.textContent = `${book.title} by ${book.author}`;
+                        recommendationsDiv.appendChild(bookElement);
+                    });
+                }
+            } catch (error) {
+                console.error("Error getting recommendations: ", error);
+            }
+        }
+    </script>
+</body>
+</html>
